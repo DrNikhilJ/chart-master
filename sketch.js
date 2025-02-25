@@ -169,19 +169,6 @@ function nextPattern() {
     });
 }
 
-function previousPattern() {
-    console.log("Moving to previous pattern...");
-    currentPatternIndex = (currentPatternIndex - 1 + patterns.length) % patterns.length;
-    selectedAnswer = null;
-    img = loadImage(patterns[currentPatternIndex].image, () => {
-        console.log("Previous image loaded: " + patterns[currentPatternIndex].image);
-        createGameUI();
-    }, () => {
-        console.error("Previous image failed: " + patterns[currentPatternIndex].image);
-        createGameUI();
-    });
-}
-
 function playAgain() {
     console.log("Resetting game...");
     currentPatternIndex = 0;
