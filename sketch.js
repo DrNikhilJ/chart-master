@@ -198,38 +198,41 @@ function playAgain() {
 }
 
 function shareScore() {
-    console.log("Sharing score...");
-    let percentage = Math.round((score / (totalAttempts || 1)) * 100);
-    let shareText = `I scored ${score}/${totalAttempts} (${percentage}%) on this Chart Patterns Quiz! Test your trading skills here: [Your Game URL]`;
-    let encodedText = encodeURIComponent(shareText);
+    const percentage = ((score / currentQuestions.length) * 100).toFixed(1);
+    const shareText = generateShareText(score, currentQuestions.length, percentage);
+    const url = window.location.href;
+    
+    // Create share buttons container if it doesn't exist
+    const shareArea = document.getElementById('share-area');
+    
+    // Clear previous share buttons
+    shareArea.innerHTML = `
+        <button class="share-button" onclick="shareToWhatsApp()">Share on WhatsApp</button>
+        <button class="share-button" onclick="shareToTwitter()">Share on Twitter</button>
+        <button class="share-button" onclick="shareToFacebook()">Share on Facebook</button>
+        <p id="share-confirmation" class="share-confirmation"></p>
+    `;
+}
 
-    // Create a small popup or dropdown for share options
-    let container = select('#game-container');
-    let shareDiv = createDiv('');
-    shareDiv.id('share-options');
-    shareDiv.parent(container);
-    shareDiv.style('margin-top', '10px');
+// Individual share functions for each platform
+function shareToWhatsApp() {
+    const percentage = ((score / currentQuestions.length) * 100).toFixed(1);
+    const shareText = generateShareText(score, currentQuestions.length, percentage);
+    const url = window.location.href;
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + url)}`;
+    window.open(whatsappUrl, '_blank');
+}
 
-    let twitterBtn = createButton('Share on Twitter');
-    twitterBtn.parent(shareDiv);
-    twitterBtn.mousePressed(() => {
-        window.open(`https://twitter.com/intent/tweet?text=${encodedText}`, '_blank');
-    });
-    twitterBtn.style('margin-right', '10px');
+function shareToTwitter() {
+    const percentage = ((score / currentQuestions.length) * 100).toFixed(1);
+    const shareText = generateShareText(score, currentQuestions.length, percentage);
+    const url = window.location.href;
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(url)}`;
+    window.open(twitterUrl, '_blank');
+}
 
-    let facebookBtn = createButton('Share on Facebook');
-    facebookBtn.parent(shareDiv);
-    facebookBtn.mousePressed(() => {
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=[Your Game URL]&quote=${encodedText}`, '_blank');
-    });
-    facebookBtn.style('margin-right', '10px');
-
-    let whatsappBtn = createButton('Share on WhatsApp');
-    whatsappBtn.parent(shareDiv);
-    whatsappBtn.mousePressed(() => {
-        window.open(`https://api.whatsapp.com/send?text=${encodedText}`, '_blank');
-    });
-
-    // Optional: Add a close button or auto-remove after some time
-    setTimeout(() => shareDiv.remove(), 10000); // Remove after 10 seconds
+function shareToFacebook() {
+    const url = window.location.href;
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+    window.open(facebookUrl, '_blank');
 }
