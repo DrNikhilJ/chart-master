@@ -37,6 +37,8 @@ let patterns = [
 let currentPatternIndex = 0;
 let selectedAnswer = null;
 let img;
+let score = 0; // New variable to track score
+let totalAttempts = 0; // Track total attempts for score calculation
 
 function setup() {
     console.log("Setup running...");
@@ -58,13 +60,19 @@ function createGameUI() {
     }
     container.html(''); // Clear previous content
 
+    // Score Display
+    let scoreDisplay = createP(`Score: ${score} / ${totalAttempts} (${Math.round((score / (totalAttempts || 1)) * 100)}%)`);
+    scoreDisplay.parent(container);
+    scoreDisplay.style('font-size', '18px');
+    scoreDisplay.style('margin-bottom', '10px');
+
     // Question
     let question = createP(patterns[currentPatternIndex].question);
     question.parent(container);
     question.style('font-size', '20px');
     question.style('margin-bottom', '20px');
 
-    // Image (with placeholder until loaded)
+    // Image
     let imgElement = createImg(patterns[currentPatternIndex].image, 'Chart Pattern');
     imgElement.parent(container);
     imgElement.attribute('onerror', 'this.src="assets/images/placeholder.jpg"');
@@ -92,7 +100,7 @@ function createGameUI() {
     explanation.parent(container);
     explanation.style('display', 'none');
 
-    // Navigation Buttons (hidden initially)
+    // Navigation and Action Buttons
     let navDiv = createDiv('');
     navDiv.id('nav-buttons');
     navDiv.parent(container);
@@ -109,13 +117,27 @@ function createGameUI() {
     nextBtn.id('next-button');
     nextBtn.parent(navDiv);
     nextBtn.mousePressed(nextPattern);
+    nextBtn.style('margin-right', '10px');
+
+    let playAgainBtn = createButton('Play Again');
+    playAgainBtn.id('play-again-button');
+    playAgainBtn.parent(navDiv);
+    playAgainBtn.mousePressed(playAgain);
+    playAgainBtn.style('margin-right', '10px');
+
+    let shareBtn = createButton('Share with Friends');
+    shareBtn.id('share-button');
+    shareBtn.parent(navDiv);
+    shareBtn.mousePressed(showScore);
 }
 
 function selectAnswer(answer) {
     if (selectedAnswer) return;
     console.log("Answer selected: " + answer);
     selectedAnswer = answer;
+    totalAttempts++; // Increment attempts
     let isCorrect = answer === patterns[currentPatternIndex].correct;
+    if (isCorrect) score++; // Increment score if correct
 
     // Feedback
     let feedback = select('#feedback');
@@ -158,4 +180,56 @@ function previousPattern() {
         console.error("Previous image failed: " + patterns[currentPatternIndex].image);
         createGameUI();
     });
+}
+
+function playAgain() {
+    console.log("Resetting game...");
+    currentPatternIndex = 0;
+    score = 0;
+    totalAttempts = 0;
+    selectedAnswer = null;
+    img = loadImage(patterns[currentPatternIndex].image, () => {
+        console.log("Game reset, image loaded: " + patterns[currentPatternIndex].image);
+        createGameUI();
+    }, () => {
+        console.error("Reset image failed: " + patterns[currentPatternIndex].image);
+        createGameUI();
+    });
+}
+
+function shareScore() {
+    console.log("Sharing score...");
+    let percentage = Math.round((score / (totalAttempts || 1)) * 100);
+    let shareText = `I scored ${score}/${totalAttempts} (${percentage}%) on this Chart Patterns Quiz! Test your trading skills here: [Your Game URL]`;
+    let encodedText = encodeURIComponent(shareText);
+
+    // Create a small popup or dropdown for share options
+    let container = select('#game-container');
+    let shareDiv = createDiv('');
+    shareDiv.id('share-options');
+    shareDiv.parent(container);
+    shareDiv.style('margin-top', '10px');
+
+    let twitterBtn = createButton('Share on Twitter');
+    twitterBtn.parent(shareDiv);
+    twitterBtn.mousePressed(() => {
+        window.open(`https://twitter.com/intent/tweet?text=${encodedText}`, '_blank');
+    });
+    twitterBtn.style('margin-right', '10px');
+
+    let facebookBtn = createButton('Share on Facebook');
+    facebookBtn.parent(shareDiv);
+    facebookBtn.mousePressed(() => {
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=[Your Game URL]&quote=${encodedText}`, '_blank');
+    });
+    facebookBtn.style('margin-right', '10px');
+
+    let whatsappBtn = createButton('Share on WhatsApp');
+    whatsappBtn.parent(shareDiv);
+    whatsappBtn.mousePressed(() => {
+        window.open(`https://api.whatsapp.com/send?text=${encodedText}`, '_blank');
+    });
+
+    // Optional: Add a close button or auto-remove after some time
+    setTimeout(() => shareDiv.remove(), 10000); // Remove after 10 seconds
 }

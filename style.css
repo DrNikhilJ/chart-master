@@ -20,6 +20,7 @@ body {
     width: 90%;
 }
 
+/* General button styling */
 button {
     background: #00cc99;
     border: none;
@@ -45,6 +46,14 @@ button[disabled] {
     cursor: not-allowed;
 }
 
+/* Score display */
+#game-container p:first-child {
+    font-size: 18px;
+    color: #00cc99;
+    margin-bottom: 10px;
+}
+
+/* Explanation styling */
 #explanation {
     margin-top: 20px;
     font-size: 14px;
@@ -55,13 +64,16 @@ button[disabled] {
     display: none;
 }
 
+/* Navigation buttons container */
 #nav-buttons {
     display: none;
     justify-content: space-between;
     margin-top: 20px;
     width: 100%;
+    flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
 }
 
+/* Back button */
 #back-button {
     background: #3366ff;
 }
@@ -70,6 +82,7 @@ button[disabled] {
     background: #2952cc;
 }
 
+/* Next button */
 #next-button {
     background: #ff3366;
 }
@@ -78,6 +91,65 @@ button[disabled] {
     background: #e62e5c;
 }
 
+/* Play Again button */
+#play-again-button {
+    background: #ff9900; /* Orange for distinction */
+}
+
+#play-again-button:hover:not([disabled]) {
+    background: #e68a00;
+}
+
+/* Share button */
+#share-button {
+    background: #9933ff; /* Purple for distinction */
+}
+
+#share-button:hover:not([disabled]) {
+    background: #8026d9;
+}
+
+/* Share options container */
+#share-options {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px; /* Space between share buttons */
+}
+
+/* Share option buttons (Twitter, Facebook, WhatsApp) */
+#share-options button {
+    padding: 8px 16px;
+    font-size: 14px;
+}
+
+/* Specific colors for share buttons */
+#share-options button:nth-child(1) { /* Twitter */
+    background: #1da1f2;
+}
+
+#share-options button:nth-child(1):hover:not([disabled]) {
+    background: #1a91da;
+}
+
+#share-options button:nth-child(2) { /* Facebook */
+    background: #4267b2;
+}
+
+#share-options button:nth-child(2):hover:not([disabled]) {
+    background: #375a9d;
+}
+
+#share-options button:nth-child(3) { /* WhatsApp */
+    background: #25d366;
+}
+
+#share-options button:nth-child(3):hover:not([disabled]) {
+    background: #20bd57;
+}
+
+/* Image styling */
 img {
     max-width: 100%;
     height: auto;
@@ -86,6 +158,7 @@ img {
     box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
 }
 
+/* Pattern count (if you add it later) */
 #pattern-count {
     font-size: 14px;
     color: #aaa;
