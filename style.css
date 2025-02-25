@@ -32,13 +32,17 @@ button {
     transition: background 0.3s, transform 0.1s;
 }
 
-button:hover {
+button:hover:not([disabled]) {
     background: #00b386;
     transform: scale(1.05);
 }
 
-button:active {
+button:active:not([disabled]) {
     transform: scale(0.95);
+}
+
+button[disabled] {
+    cursor: not-allowed;
 }
 
 #explanation {
@@ -51,12 +55,26 @@ button:active {
     display: none;
 }
 
-#next-button {
-    background: #ff3366;
+#nav-buttons {
     display: none;
+    justify-content: space-between;
+    margin-top: 20px;
+    width: 100%;
 }
 
-#next-button:hover {
+#back-button {
+    background: #3366ff;
+}
+
+#back-button:hover:not([disabled]) {
+    background: #2952cc;
+}
+
+#next-button {
+    background: #ff3366;
+}
+
+#next-button:hover:not([disabled]) {
     background: #e62e5c;
 }
 
@@ -66,4 +84,10 @@ img {
     border-radius: 10px;
     margin-bottom: 20px;
     box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
+}
+
+#pattern-count {
+    font-size: 14px;
+    color: #aaa;
+    margin-top: 20px;
 }

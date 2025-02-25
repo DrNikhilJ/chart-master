@@ -41,7 +41,6 @@ let img;
 function setup() {
     console.log("Setup running...");
     noCanvas();
-    // Load initial image asynchronously, but render UI immediately
     img = loadImage(patterns[currentPatternIndex].image, () => {
         console.log("Initial image loaded: " + patterns[currentPatternIndex].image);
     }, () => {
@@ -68,8 +67,8 @@ function createGameUI() {
     // Image (with placeholder until loaded)
     let imgElement = createImg(patterns[currentPatternIndex].image, 'Chart Pattern');
     imgElement.parent(container);
-    imgElement.attribute('onerror', 'this.src="assets/images/placeholder.jpg"'); // Fallback if image fails
-    imgElement.style('max-width', '100%'); // Ensure it fits container
+    imgElement.attribute('onerror', 'this.src="assets/images/placeholder.jpg"');
+    imgElement.style('max-width', '100%');
 
     // Options
     let optionsDiv = createDiv('');
@@ -93,12 +92,23 @@ function createGameUI() {
     explanation.parent(container);
     explanation.style('display', 'none');
 
-    // Next Button (hidden initially)
+    // Navigation Buttons (hidden initially)
+    let navDiv = createDiv('');
+    navDiv.id('nav-buttons');
+    navDiv.parent(container);
+    navDiv.style('display', 'none');
+    navDiv.style('margin-top', '20px');
+
+    let backBtn = createButton('Previous Pattern');
+    backBtn.id('back-button');
+    backBtn.parent(navDiv);
+    backBtn.mousePressed(previousPattern);
+    backBtn.style('margin-right', '10px');
+
     let nextBtn = createButton('Next Pattern');
     nextBtn.id('next-button');
-    nextBtn.parent(container);
+    nextBtn.parent(navDiv);
     nextBtn.mousePressed(nextPattern);
-    nextBtn.style('display', 'none');
 }
 
 function selectAnswer(answer) {
@@ -117,11 +127,11 @@ function selectAnswer(answer) {
     let explanation = select('#explanation');
     explanation.html(patterns[currentPatternIndex].explanation);
     explanation.style('display', 'block');
-    explanation.style('color', '#ccc'); // Neutral color for explanation
+    explanation.style('color', '#ccc');
 
-    // Show Next Button
-    let nextBtn = select('#next-button');
-    nextBtn.style('display', 'block');
+    // Show Navigation Buttons
+    let navDiv = select('#nav-buttons');
+    navDiv.style('display', 'flex');
 }
 
 function nextPattern() {
@@ -133,6 +143,19 @@ function nextPattern() {
         createGameUI();
     }, () => {
         console.error("Next image failed: " + patterns[currentPatternIndex].image);
-        createGameUI(); // Proceed even if image fails
+        createGameUI();
+    });
+}
+
+function previousPattern() {
+    console.log("Moving to previous pattern...");
+    currentPatternIndex = (currentPatternIndex - 1 + patterns.length) % patterns.length;
+    selectedAnswer = null;
+    img = loadImage(patterns[currentPatternIndex].image, () => {
+        console.log("Previous image loaded: " + patterns[currentPatternIndex].image);
+        createGameUI();
+    }, () => {
+        console.error("Previous image failed: " + patterns[currentPatternIndex].image);
+        createGameUI();
     });
 }
