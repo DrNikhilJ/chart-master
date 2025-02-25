@@ -197,6 +197,10 @@ function playAgain() {
     });
 }
 
+function generateShareText(score, totalQuestions, percentage) {
+    return `🎯 I scored ${score}/${totalQuestions} (${percentage}%) in Chart Masters! Think you can beat my score? Take the challenge! #StockMarketCrorepati #FinancialLiteracy`;
+}
+
 function shareScore() {
     const percentage = ((score / currentQuestions.length) * 100).toFixed(1);
     const shareText = generateShareText(score, currentQuestions.length, percentage);
