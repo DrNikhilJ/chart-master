@@ -163,6 +163,13 @@ function selectAnswer(answer) {
     // Show Navigation Buttons
     let navDiv = select('#nav-buttons');
     navDiv.style('display', 'flex');
+
+    // Automatically move to next pattern after 6 seconds, if not at game end
+    if (questionsCompleted < maxQuestions) {
+        setTimeout(() => {
+            nextPattern();
+        }, 6000); // 6000 milliseconds = 6 seconds
+    }
 }
 
 function nextPattern() {
