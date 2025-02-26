@@ -164,31 +164,73 @@ function selectAnswer(answer) {
     let navDiv = select('#nav-buttons');
     navDiv.style('display', 'flex');
 
-    // Automatically move to next pattern after 6 seconds, if not at game end
-    if (questionsCompleted < maxQuestions) {
+    // Only set automatic advance if we haven't reached the maximum questions
+    if (questionsCompleted < maxQuestions - 1) { // -1 because we're still on the current question
         setTimeout(() => {
-            nextPattern();
-        }, 6000); // 6000 milliseconds = 6 seconds
+            // Only advance if this question has been answered and we're still on it
+            // (prevents issues if user manually clicked Next before the timer fired)
+            if (selectedAnswer) {
+                nextPattern();
+            }
+        }, 12000); // 12000 milliseconds = 12 seconds
     }
 }
 
 function nextPattern() {
     console.log("Moving to next pattern...");
     questionsCompleted++; // Increment completed questions
-    if (questionsCompleted < maxQuestions) {
-        currentPatternIndex = (currentPatternIndex + 1) % patterns.length;
-        selectedAnswer = null;
-        img = loadImage(patterns[currentPatternIndex].image, () => {
-            console.log("Next image loaded: " + patterns[currentPatternIndex].image);
-            createGameUI();
-        }, () => {
-            console.error("Next image failed: " + patterns[currentPatternIndex].image);
-            createGameUI();
-        });
-    } else {
+    
+    // Check if game should end
+    if (questionsCompleted >= maxQuestions) {
         console.log("Game ended after 30 questions.");
-        createGameUI(); // Update UI to show final state with Play Again button
+        endGame();
+        return;
     }
+    
+    // If not at end, proceed to next pattern
+    currentPatternIndex = (currentPatternIndex + 1) % patterns.length;
+    selectedAnswer = null;
+    img = loadImage(patterns[currentPatternIndex].image, () => {
+        console.log("Next image loaded: " + patterns[currentPatternIndex].image);
+        createGameUI();
+    }, () => {
+        console.error("Next image failed: " + patterns[currentPatternIndex].image);
+        createGameUI();
+    });
+}
+
+function endGame() {
+    // Clear the container and show final score and play again option
+    let container = select('#game-container');
+    container.html(''); // Clear previous content
+    
+    // Final Score Display
+    let finalScore = createP(`Final Score: ${score} / ${totalAttempts} (${Math.round((score / totalAttempts) * 100)}%)`);
+    finalScore.parent(container);
+    finalScore.style('font-size', '24px');
+    finalScore.style('font-weight', 'bold');
+    finalScore.style('margin-bottom', '20px');
+    
+    // Game Completed Message
+    let completedMsg = createP(`Congratulations! You've completed all ${maxQuestions} questions.`);
+    completedMsg.parent(container);
+    completedMsg.style('font-size', '18px');
+    completedMsg.style('margin-bottom', '30px');
+    
+    // Play Again Button
+    let playAgainBtn = createButton('Play Again');
+    playAgainBtn.parent(container);
+    playAgainBtn.mousePressed(playAgain);
+    playAgainBtn.style('padding', '10px 20px');
+    playAgainBtn.style('font-size', '16px');
+    playAgainBtn.style('margin-right', '15px');
+    
+    // Share Button
+    let shareBtn = createButton('Share Your Score');
+    shareBtn.parent(container);
+    shareBtn.mousePressed(shareScore);
+    shareBtn.style('padding', '10px 20px');
+    shareBtn.style('font-size', '16px');
 }
 
 function playAgain() {
