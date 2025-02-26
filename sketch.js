@@ -37,8 +37,10 @@ let patterns = [
 let currentPatternIndex = 0;
 let selectedAnswer = null;
 let img;
-let score = 0; // New variable to track score
-let totalAttempts = 0; // Track total attempts for score calculation
+let score = 0;
+let totalAttempts = 0;
+const maxQuestions = 30; // New constant to limit the game to 30 questions
+let questionsCompleted = 0; // New variable to track completed questions
 
 function setup() {
     console.log("Setup running...");
@@ -65,6 +67,12 @@ function createGameUI() {
     scoreDisplay.parent(container);
     scoreDisplay.style('font-size', '18px');
     scoreDisplay.style('margin-bottom', '10px');
+
+    // Question Counter
+    let questionCounter = createP(`Question ${questionsCompleted + 1} of ${maxQuestions}`);
+    questionCounter.parent(container);
+    questionCounter.style('font-size', '16px');
+    questionCounter.style('margin-bottom', '10px');
 
     // Question
     let question = createP(patterns[currentPatternIndex].question);
@@ -107,37 +115,38 @@ function createGameUI() {
     navDiv.style('display', 'none');
     navDiv.style('margin-top', '20px');
 
-    let backBtn = createButton('Previous Pattern');
-    backBtn.id('back-button');
-    backBtn.parent(navDiv);
-    backBtn.mousePressed(previousPattern);
-    backBtn.style('margin-right', '10px');
+    // Next Button (shown until game ends)
+    if (questionsCompleted < maxQuestions) {
+        let nextBtn = createButton('Next Pattern');
+        nextBtn.id('next-button');
+        nextBtn.parent(navDiv);
+        nextBtn.mousePressed(nextPattern);
+        nextBtn.style('margin-right', '10px');
+    }
 
-    let nextBtn = createButton('Next Pattern');
-    nextBtn.id('next-button');
-    nextBtn.parent(navDiv);
-    nextBtn.mousePressed(nextPattern);
-    nextBtn.style('margin-right', '10px');
+    // Play Again Button (shown only when game ends)
+    if (questionsCompleted === maxQuestions) {
+        let playAgainBtn = createButton('Play Again');
+        playAgainBtn.id('play-again-button');
+        playAgainBtn.parent(navDiv);
+        playAgainBtn.mousePressed(playAgain);
+        playAgainBtn.style('margin-right', '10px');
+    }
 
-    let playAgainBtn = createButton('Play Again');
-    playAgainBtn.id('play-again-button');
-    playAgainBtn.parent(navDiv);
-    playAgainBtn.mousePressed(playAgain);
-    playAgainBtn.style('margin-right', '10px');
-
+    // Share Button (always available after answer selection)
     let shareBtn = createButton('Share with Friends');
     shareBtn.id('share-button');
     shareBtn.parent(navDiv);
-    shareBtn.mousePressed(showScore);
+    shareBtn.mousePressed(shareScore);
 }
 
 function selectAnswer(answer) {
     if (selectedAnswer) return;
     console.log("Answer selected: " + answer);
     selectedAnswer = answer;
-    totalAttempts++; // Increment attempts
+    totalAttempts++;
     let isCorrect = answer === patterns[currentPatternIndex].correct;
-    if (isCorrect) score++; // Increment score if correct
+    if (isCorrect) score++;
 
     // Feedback
     let feedback = select('#feedback');
@@ -158,15 +167,21 @@ function selectAnswer(answer) {
 
 function nextPattern() {
     console.log("Moving to next pattern...");
-    currentPatternIndex = (currentPatternIndex + 1) % patterns.length;
-    selectedAnswer = null;
-    img = loadImage(patterns[currentPatternIndex].image, () => {
-        console.log("Next image loaded: " + patterns[currentPatternIndex].image);
-        createGameUI();
-    }, () => {
-        console.error("Next image failed: " + patterns[currentPatternIndex].image);
-        createGameUI();
-    });
+    questionsCompleted++; // Increment completed questions
+    if (questionsCompleted < maxQuestions) {
+        currentPatternIndex = (currentPatternIndex + 1) % patterns.length;
+        selectedAnswer = null;
+        img = loadImage(patterns[currentPatternIndex].image, () => {
+            console.log("Next image loaded: " + patterns[currentPatternIndex].image);
+            createGameUI();
+        }, () => {
+            console.error("Next image failed: " + patterns[currentPatternIndex].image);
+            createGameUI();
+        });
+    } else {
+        console.log("Game ended after 30 questions.");
+        createGameUI(); // Update UI to show final state with Play Again button
+    }
 }
 
 function playAgain() {
@@ -174,6 +189,7 @@ function playAgain() {
     currentPatternIndex = 0;
     score = 0;
     totalAttempts = 0;
+    questionsCompleted = 0; // Reset completed questions
     selectedAnswer = null;
     img = loadImage(patterns[currentPatternIndex].image, () => {
         console.log("Game reset, image loaded: " + patterns[currentPatternIndex].image);
@@ -189,8 +205,8 @@ function generateShareText(score, totalQuestions, percentage) {
 }
 
 function shareScore() {
-    const percentage = ((score / currentQuestions.length) * 100).toFixed(1);
-    const shareText = generateShareText(score, currentQuestions.length, percentage);
+    const percentage = ((score / patterns.length) * 100).toFixed(1); // Fixed reference to patterns.length
+    const shareText = generateShareText(score, patterns.length, percentage);
     const url = window.location.href;
     
     // Create share buttons container if it doesn't exist
@@ -207,16 +223,16 @@ function shareScore() {
 
 // Individual share functions for each platform
 function shareToWhatsApp() {
-    const percentage = ((score / currentQuestions.length) * 100).toFixed(1);
-    const shareText = generateShareText(score, currentQuestions.length, percentage);
+    const percentage = ((score / patterns.length) * 100).toFixed(1); // Fixed reference to patterns.length
+    const shareText = generateShareText(score, patterns.length, percentage);
     const url = window.location.href;
     const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + url)}`;
     window.open(whatsappUrl, '_blank');
 }
 
 function shareToTwitter() {
-    const percentage = ((score / currentQuestions.length) * 100).toFixed(1);
-    const shareText = generateShareText(score, currentQuestions.length, percentage);
+    const percentage = ((score / patterns.length) * 100).toFixed(1); // Fixed reference to patterns.length
+    const shareText = generateShareText(score, patterns.length, percentage);
     const url = window.location.href;
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(url)}`;
     window.open(twitterUrl, '_blank');
