@@ -207,46 +207,78 @@ function playAgain() {
     });
 }
 
-function generateShareText(score, totalQuestions, percentage) {
-    return `🎯 I scored ${score}/${totalQuestions} (${percentage}%) in Chart Masters! Think you can beat my score? Take the challenge! #StockMarketCrorepati #FinancialLiteracy`;
+function generateShareText(score, totalAttempts, percentage) {
+    return `🎯 I scored ${score}/${totalAttempts} (${percentage}%) in Chart Masters! Think you can beat my score? Take the challenge! #StockMarketCrorepati #FinancialLiteracy`;
 }
 
 function shareScore() {
-    const percentage = ((score / patterns.length) * 100).toFixed(1); // Fixed reference to patterns.length
-    const shareText = generateShareText(score, patterns.length, percentage);
+    // Calculate correct percentage based on actual attempts
+    const percentage = Math.round((score / totalAttempts) * 100);
+    const shareText = generateShareText(score, totalAttempts, percentage);
     const url = window.location.href;
     
-    // Create share buttons container if it doesn't exist
-    const shareArea = document.getElementById('share-area');
+    // Create share area if it doesn't exist
+    let shareArea = select('#share-area');
+    if (!shareArea) {
+        shareArea = createDiv('');
+        shareArea.id('share-area');
+        shareArea.parent(select('#game-container'));
+        shareArea.style('margin-top', '15px');
+    } else {
+        shareArea.html(''); // Clear previous content
+    }
     
-    // Clear previous share buttons
-    shareArea.innerHTML = `
-        <button class="share-button" onclick="shareToWhatsApp()">Share on WhatsApp</button>
-        <button class="share-button" onclick="shareToTwitter()">Share on Twitter</button>
-        <button class="share-button" onclick="shareToFacebook()">Share on Facebook</button>
-        <p id="share-confirmation" class="share-confirmation"></p>
-    `;
+    // Create share buttons
+    let whatsAppBtn = createButton('Share on WhatsApp');
+    whatsAppBtn.parent(shareArea);
+    whatsAppBtn.class('share-button');
+    whatsAppBtn.mousePressed(() => shareToWhatsApp(shareText, url));
+    
+    let twitterBtn = createButton('Share on Twitter');
+    twitterBtn.parent(shareArea);
+    twitterBtn.class('share-button');
+    twitterBtn.mousePressed(() => shareToTwitter(shareText, url));
+    
+    let facebookBtn = createButton('Share on Facebook');
+    facebookBtn.parent(shareArea);
+    facebookBtn.class('share-button');
+    facebookBtn.mousePressed(() => shareToFacebook(url));
+    
+    // Add confirmation message area
+    let confirmMsg = createP('');
+    confirmMsg.id('share-confirmation');
+    confirmMsg.parent(shareArea);
 }
 
-// Individual share functions for each platform
-function shareToWhatsApp() {
-    const percentage = ((score / patterns.length) * 100).toFixed(1); // Fixed reference to patterns.length
-    const shareText = generateShareText(score, patterns.length, percentage);
-    const url = window.location.href;
+function shareToWhatsApp(shareText, url) {
     const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + url)}`;
     window.open(whatsappUrl, '_blank');
+    updateShareConfirmation('Shared to WhatsApp!');
 }
 
-function shareToTwitter() {
-    const percentage = ((score / patterns.length) * 100).toFixed(1); // Fixed reference to patterns.length
-    const shareText = generateShareText(score, patterns.length, percentage);
-    const url = window.location.href;
+function shareToTwitter(shareText, url) {
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(url)}`;
     window.open(twitterUrl, '_blank');
+    updateShareConfirmation('Shared to Twitter!');
 }
 
-function shareToFacebook() {
-    const url = window.location.href;
+function shareToFacebook(url) {
     const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
     window.open(facebookUrl, '_blank');
+    updateShareConfirmation('Shared to Facebook!');
+}
+
+function updateShareConfirmation(message) {
+    let confirmation = select('#share-confirmation');
+    if (confirmation) {
+        confirmation.html(message);
+        confirmation.style('color', '#00cc99');
+        confirmation.style('margin-top', '10px');
+        confirmation.style('font-weight', 'bold');
+        
+        // Clear message after 3 seconds
+        setTimeout(() => {
+            confirmation.html('');
+        }, 3000);
+    }
 }
